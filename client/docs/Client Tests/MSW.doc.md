@@ -1,26 +1,26 @@
-# MSW (Mock Service Worker) — Implementation Chain Walkthrough
+# MSW, faking the network in unit tests
 
 > **Scope**: How MSW intercepts HTTP requests during Vitest unit/integration tests, providing fake API responses without a running backend.
-> **Core principle**: Intercept at the **network level**, not by mocking `axios`/`fetch`. Your application code runs unmodified — it has no idea the server is fake.
+> **Core principle**: Intercept at the **network level**, not by mocking `axios`/`fetch`. Your application code runs unmodified. It has no idea the server is fake.
 
 ---
 
-## 1. What MSW Does in This Project
+## 1. What MSW does in this project
 
 | Without MSW | With MSW |
 |---|---|
-| Component calls `axios.get('/api/auth/me')` | Same — component code is identical |
+| Component calls `axios.get('/api/auth/me')` | Same, component code is identical |
 | Request hits the real backend (or fails) | MSW **intercepts** the request before it leaves the process |
 | Test depends on backend state | MSW handler returns a **deterministic fake response** |
 | Tests are flaky, slow, coupled | Tests are fast, isolated, predictable |
 
 MSW works in **two modes**:
-- **Browser mode** (`setupWorker`) — uses a real Service Worker for dev/storybook. Not used here.
-- **Node mode** (`setupServer`) — patches Node's `http`/`https` modules to intercept requests. **This is what Vitest tests use.**
+- Browser mode, `setupWorker`, uses a real Service Worker for dev/storybook. Not used here.
+- Node mode, `setupServer`, patches Node's `http`/`https` modules to intercept requests. **This is what Vitest tests use.**
 
 ### Installed package
 
-**File**: [`package.json`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/package.json)
+**File**: [`package.json`](../../package.json)
 
 ```json
 "msw": "^2.14.6"
@@ -28,7 +28,7 @@ MSW works in **two modes**:
 
 ---
 
-## 2. File Structure
+## 2. File structure
 
 ```
 src/test/msw/
@@ -38,11 +38,11 @@ src/test/msw/
 
 ---
 
-## 3. Handlers — The Fake API
+## 3. Handlers, the fake API
 
-**File**: [`src/test/msw/handlers.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/msw/handlers.ts)
+**File**: [`src/test/msw/handlers.ts`](../../src/test/msw/handlers.ts)
 
-### 3a. Response Helpers
+### 3a. Response helpers
 
 ```ts
 import { http, HttpResponse } from 'msw'
@@ -85,15 +85,15 @@ export const apiError = (status: number, message = 'Request failed') =>
 > [!IMPORTANT]
 > These helpers mirror the **exact response shape** of the real backend API (`{ success, message, data, timestamp }`). If the real API envelope changes, these must change too, or tests will silently test against a wrong contract.
 
-### 3b. Default Mock Data
+### 3b. Default mock data
 
 ```ts
 export const mockAuthMeData: AuthMeData = createMockAuthMe()
 ```
 
-This calls the fixture factory in [`fixtures.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/fixtures.ts), producing a full `AuthMeData` object with a super-admin user and all capabilities.
+This calls the fixture factory in [`fixtures.ts`](../../src/test/fixtures.ts), producing a full `AuthMeData` object with a super-admin user and all capabilities.
 
-### 3c. Default Handler Array
+### 3c. Default handler array
 
 ```ts
 export const handlers = [
@@ -114,9 +114,9 @@ export const handlers = [
 | `http.post('/api/auth/logout', ...)` | `POST /api/auth/logout` | Empty success (no data payload) |
 
 > [!NOTE]
-> Only auth endpoints have default handlers. This is intentional — most tests will `server.use(...)` to add handlers specific to what they're testing. The auth defaults exist because almost every component-level test needs the auth-me query to succeed (the app checks auth on mount).
+> Only auth endpoints have default handlers. This is intentional. Most tests will `server.use(...)` to add handlers specific to what they're testing. The auth defaults exist because almost every component-level test needs the auth-me query to succeed (the app checks auth on mount).
 
-### The `http.get()` / `http.post()` API:
+### The `http.get()` and `http.post()` API
 
 ```ts
 http.get('/api/auth/me', (info) => {
@@ -127,13 +127,13 @@ http.get('/api/auth/me', (info) => {
 })
 ```
 
-MSW uses path matching — `/api/auth/me` matches any request to that path regardless of host/port (because in jsdom, requests go to the same origin).
+MSW matches on path alone, so `/api/auth/me` matches any request to that path regardless of host/port (because in jsdom, requests go to the same origin).
 
 ---
 
-## 4. Server — The Interceptor
+## 4. Server, the interceptor
 
-**File**: [`src/test/msw/server.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/msw/server.ts)
+**File**: [`src/test/msw/server.ts`](../../src/test/msw/server.ts)
 
 ```ts
 import { setupServer } from 'msw/node'
@@ -151,9 +151,9 @@ At this point the server is **created but NOT listening**. It doesn't intercept 
 
 ---
 
-## 5. Lifecycle — How setup.ts Wires It
+## 5. Lifecycle: how `setup.ts` wires it
 
-**File**: [`src/test/setup.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/setup.ts)
+**File**: [`src/test/setup.ts`](../../src/test/setup.ts)
 
 ```ts
 import { server } from './msw/server'
@@ -168,7 +168,7 @@ afterEach(() => {
 afterAll(() => server.close())
 ```
 
-### The lifecycle in detail:
+### The lifecycle in detail
 
 ```
 Worker boots
@@ -223,13 +223,13 @@ afterAll() ──▶ server.close()
 
 If a test makes an HTTP request that **no handler** matches:
 - MSW prints a **warning** to the console (not an error).
-- The request is **not intercepted** — it either fails or tries to reach a real server.
+- The request is **not intercepted**. It either fails or tries to reach a real server.
 
 This catches missing handlers early without crashing the test suite.
 
 ---
 
-## 6. Per-Test Handler Overrides
+## 6. Per-test handler overrides
 
 Tests can temporarily add or override handlers for specific scenarios:
 
@@ -246,7 +246,7 @@ it('shows error toast on 401', async () => {
 **How `server.use()` works:**
 
 1. The new handler is pushed to the **front** of the handler list.
-2. MSW matches handlers **first-in-first-out** — the override takes priority.
+2. MSW matches handlers first-in-first-out, so the override takes priority.
 3. `afterEach → server.resetHandlers()` removes the override.
 4. The next test sees the original defaults again.
 
@@ -261,13 +261,13 @@ After resetHandlers(): [GET /api/auth/me → ok(data)]    ← back to normal
 
 ---
 
-## 7. Fixtures — The Mock Data Factory
+## 7. Fixtures, the mock data factory
 
-**File**: [`src/test/fixtures.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/fixtures.ts)
+**File**: [`src/test/fixtures.ts`](../../src/test/fixtures.ts)
 
 Fixtures provide **factory functions** that generate typed mock data matching the real API types.
 
-### Auto-incrementing IDs
+### Auto-incrementing ids
 
 ```ts
 let nextId = 1
@@ -279,7 +279,7 @@ export function resetMockIds() {
 
 Every factory function calls `nextId++`, producing unique IDs. `resetMockIds()` is called in `afterEach` to ensure ID sequences are deterministic per test.
 
-### Factory functions:
+### Factory functions
 
 | Factory | Returns | Default shape |
 |---|---|---|
@@ -301,7 +301,7 @@ createMockUser({ email: 'custom@test.com' })
 
 ---
 
-## 8. Full Request Interception Chain
+## 8. Full request interception chain
 
 ```
 Component code                    MSW layer                    Test assertion
@@ -339,7 +339,7 @@ with auth data
 
 ---
 
-## 9. File Dependency Map
+## 9. File dependency map
 
 ```
 src/test/setup.ts
@@ -358,3 +358,29 @@ src/test/setup.ts
       ├── afterEach → resetMockIds()      ← Reset fixture counters
       └── afterAll  → server.close()      ← Stop intercepting
 ```
+
+---
+
+## 10. Where this shows up
+
+**A test hangs, then fails with a timeout.** The component called an endpoint
+with no handler. MSW warned in the console rather than failing loudly, because
+`onUnhandledRequest` is `'warn'`. Read the warning, add the handler.
+
+**Every test passes, and the feature is broken in production.** The handlers in
+`handlers.ts` returned the old envelope shape after the real API changed. MSW
+tests whatever contract you write down, so the fixtures are only as honest as you
+keep them.
+
+**An error state has no test.** Error paths need `server.use(...)` with
+`apiError(401)` for that one test. Without an override, the default handler
+always succeeds, and the error branch is never executed.
+
+**IDs drift between tests.** The fixture counter increments across a file.
+`resetMockIds()` in `afterEach` puts it back to 1, which is what lets a test
+assert on `id: 1` at all.
+
+---
+
+Previous: [React Testing Library](./React_Testing_library.doc.md).
+Next: [Playwright](./Playwright.doc.md), the same flows in a real browser instead of jsdom.
