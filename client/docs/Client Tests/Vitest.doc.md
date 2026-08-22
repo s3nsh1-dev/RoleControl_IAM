@@ -1,11 +1,11 @@
-# Vitest — Implementation Chain Walkthrough
+# Vitest, from pnpm test to assertion
 
 > **Scope**: How Vitest is configured, bootstrapped, and executes tests in this project.
 > **Entry point**: `pnpm test` → `vitest` CLI.
 
 ---
 
-## 1. Trigger: The CLI Command
+## 1. Trigger: the CLI command
 
 | Script | Command | Mode |
 |---|---|---|
@@ -13,7 +13,7 @@
 | `pnpm test:run` | `vitest run` | Single run, then exit |
 | `pnpm test:coverage` | `vitest run --coverage` | Single run + V8 coverage report |
 
-**File**: [`package.json`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/package.json)  
+**File**: [`package.json`](../../package.json)  
 ```json
 "test": "vitest",
 "test:run": "vitest run",
@@ -24,11 +24,11 @@
 
 ---
 
-## 2. Config Resolution
+## 2. Config resolution
 
-Vitest uses the **same config file as Vite** — there is no separate `vitest.config.ts`.
+Vitest uses the **same config file as Vite**. There is no separate `vitest.config.ts`.
 
-**File**: [`vite.config.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/vite.config.ts)
+**File**: [`vite.config.ts`](../../vite.config.ts)
 
 ```ts
 import { defineConfig } from 'vitest/config'   // ← NOT from 'vite'
@@ -54,38 +54,38 @@ export default defineConfig({
 > [!IMPORTANT]
 > `defineConfig` is imported from `vitest/config` (not `vite`). This is what gives the `test` key full type-safety. Vitest merges this with Vite's own config, so plugins like `@vitejs/plugin-react` and `@tailwindcss/vite` are still active during test transforms.
 
-### Key Config Decisions
+### Key config decisions
 
 | Option | Value | Effect |
 |---|---|---|
-| `globals: true` | — | Injects `describe`, `it`, `expect`, `vi` etc. into every test file without imports. Requires `"types": ["vitest/globals"]` in tsconfig. |
-| `environment: 'jsdom'` | — | Every test worker boots a **jsdom** instance (a headless DOM implementation) so `document`, `window`, `localStorage` etc. exist. |
+| `globals: true` | | Injects `describe`, `it`, `expect`, `vi` etc. into every test file without imports. Requires `"types": ["vitest/globals"]` in tsconfig. |
+| `environment: 'jsdom'` | | Every test worker boots a **jsdom** instance (a headless DOM implementation) so `document`, `window`, `localStorage` etc. exist. |
 | `setupFiles` | `['./src/test/setup.ts']` | Executed **once per worker** before any test file runs. This is the bootstrap hook. |
-| `css: true` | — | CSS imports are processed instead of being stubbed. Relevant because Tailwind classes are used in components. |
+| `css: true` | | CSS imports are processed instead of being stubbed. Relevant because Tailwind classes are used in components. |
 | `include` | `['src/**/*.test.{ts,tsx}']` | Only files matching this glob are treated as test files. |
 | `coverage.provider` | `'v8'` | Uses V8's built-in code coverage instead of Istanbul. Faster, native. |
 
 ---
 
-## 3. TypeScript Compilation
+## 3. TypeScript compilation
 
 Before test files execute, Vitest uses **Vite's transform pipeline** (esbuild under the hood) to compile TypeScript → JavaScript on-the-fly. No separate `tsc` step is needed.
 
-**File**: [`tsconfig.app.json`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/tsconfig.app.json)
+**File**: [`tsconfig.app.json`](../../tsconfig.app.json)
 
 ```json
 "types": ["vite/client", "vitest/globals"]
 ```
 
-This line is critical — it tells TypeScript that `describe`, `it`, `expect`, `vi`, `beforeAll`, `afterEach`, etc. exist as globals so the compiler doesn't complain even though they are never imported in test files (when `globals: true` is set in vitest config).
+This line is what makes the globals type-check. It tells TypeScript that `describe`, `it`, `expect`, `vi`, `beforeAll`, `afterEach`, etc. exist as globals so the compiler doesn't complain even though they are never imported in test files (when `globals: true` is set in vitest config).
 
 **Chain**: `tsconfig.app.json` types → TypeScript knows about vitest globals → no import needed in test files.
 
 ---
 
-## 4. Setup File Execution (The Bootstrap)
+## 4. Setup file execution, the bootstrap
 
-**File**: [`src/test/setup.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/setup.ts)
+**File**: [`src/test/setup.ts`](../../src/test/setup.ts)
 
 This file runs **once per Vitest worker thread**, before any `*.test.ts` file in that worker.
 
@@ -98,7 +98,7 @@ import { resetMockIds } from './fixtures'
 import { useAuthStore } from '@/store/auth'
 ```
 
-### Step-by-step execution order:
+### Step-by-step execution order
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
@@ -115,7 +115,7 @@ import { useAuthStore } from '@/store/auth'
 └───────────────────────────────────────────────────────────────┘
 ```
 
-### What each hook does:
+### What each hook does
 
 | Hook | Action | Why |
 |---|---|---|
@@ -129,7 +129,7 @@ import { useAuthStore } from '@/store/auth'
 | `afterEach` | `useAuthStore.setState(...)` | Force-reset the auth store's in-memory state to `{ isAuthenticated: false }`. |
 | `afterAll` | `server.close()` | Tear down the MSW interceptor. |
 
-### matchMedia Polyfill
+### The matchMedia polyfill
 
 ```ts
 Object.defineProperty(window, 'matchMedia', {
@@ -152,13 +152,23 @@ Object.defineProperty(window, 'matchMedia', {
 
 ---
 
-## 5. Test Discovery & Execution
+## 5. Test discovery and execution
 
 Vitest scans for files matching `src/**/*.test.{ts,tsx}` (from `test.include` in config).
 
-### Current test file:
+### The 12 test files it finds
 
-**File**: [`src/__tests__/constants.test.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/__tests__/constants.test.ts)
+| Kind | Files |
+| --- | --- |
+| Unit | `src/__tests__/constants.test.ts`, `src/api/__tests__/client.test.ts`, `src/utils/__tests__/rolePermissions.test.ts`, `src/utils/__tests__/format.test.ts`, `src/validation/__tests__/schemas.test.ts`, `src/components/layout/__tests__/navVisibility.test.ts` |
+| Component | `src/pages/__tests__/AuthPage.test.tsx`, `src/pages/__tests__/PostsPage.test.tsx`, `src/components/__tests__/ProtectedRoute.test.tsx`, `src/components/ui/__tests__/FormFields.test.tsx`, `src/components/ui/__tests__/Dialogs.test.tsx`, `src/components/layout/__tests__/AppShell.test.tsx` |
+
+Note that `e2e/*.spec.ts` is outside the `include` glob, so Vitest never picks up
+the Playwright specs. That separation is on purpose.
+
+### One of them, in full
+
+**File**: [`src/__tests__/constants.test.ts`](../../src/__tests__/constants.test.ts)
 
 ```ts
 import { describe, expect, it } from 'vitest'
@@ -177,26 +187,26 @@ describe('queryKeys', () => {
 ```
 
 > [!NOTE]
-> Even though `globals: true` means `describe`, `it`, `expect` are available without imports, this test explicitly imports them from `vitest`. Both approaches work — explicit imports are just a stylistic preference for clarity.
+> Even though `globals: true` means `describe`, `it`, `expect` are available without imports, this test explicitly imports them from `vitest`. Both approaches work. Explicit imports are a style choice.
 
 ---
 
-## 6. Coverage Collection
+## 6. Coverage collection
 
 When `pnpm test:coverage` runs:
 
 1. Vitest enables the **V8 coverage provider** (`@vitest/coverage-v8` package).
 2. V8 natively tracks which lines/branches/functions execute during tests.
 3. After all tests complete, Vitest generates reports in 3 formats:
-   - `text` — printed to terminal
-   - `html` — browsable report in `coverage/` directory
-   - `lcov` — machine-readable for CI tools
+   - `text`, printed to the terminal
+   - `html`, a browsable report in `coverage/`
+   - `lcov`, machine-readable for CI tools
 
 Coverage only includes files matching `src/**/*.{ts,tsx}`, excluding test infrastructure, generated schema, the entry point, and type declarations.
 
 ---
 
-## 7. Full Execution Chain (End-to-End)
+## 7. Full execution chain
 
 ```
 pnpm test
@@ -249,7 +259,7 @@ Results aggregated → printed to terminal
 
 ---
 
-## 8. File Dependency Map
+## 8. File dependency map
 
 ```
 package.json  ──"test": "vitest"──▶  vitest CLI
@@ -275,3 +285,28 @@ package.json  ──"test": "vitest"──▶  vitest CLI
                          ▼
                   src/**/*.test.{ts,tsx}  ◀── test discovery
 ```
+
+---
+
+## 9. Where this shows up
+
+**A new test file is ignored.** It sits outside `src/`, or it is named
+`*.spec.ts`. The `include` glob is `src/**/*.test.{ts,tsx}` and nothing else runs.
+
+**`describe` is not defined, in the editor only.** `globals: true` puts it on the
+runtime global, but TypeScript only believes it because of
+`"types": ["vitest/globals"]` in `tsconfig.app.json`. Drop that line and the tests
+still pass while the editor turns red.
+
+**Every test suddenly makes real network calls.** Something removed
+`setupFiles`, so `src/test/setup.ts` never ran, so MSW never started listening.
+The failure looks like a timeout, not a config error.
+
+**A test passes alone and fails in the suite.** State from the previous test
+survived. The `afterEach` block in `setup.ts` clears the DOM, the MSW overrides,
+the fixture counter, `localStorage` and the auth store for exactly this reason.
+
+---
+
+Previous: [Client testing index](./README.md).
+Next: [React Testing Library](./React_Testing_library.doc.md), what renders a component into the jsdom Vitest just booted.

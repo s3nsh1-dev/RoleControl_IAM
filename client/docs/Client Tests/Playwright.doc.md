@@ -1,25 +1,25 @@
-# Playwright — Implementation Chain Walkthrough
+# Playwright, real browser end-to-end tests
 
 > **Scope**: How Playwright runs E2E tests against a real browser with a live Vite dev server, using route-level API mocking instead of MSW.
 > **Core difference from Vitest/RTL/MSW**: Playwright tests run in a **real Chromium browser** against a **real Vite dev server**. There is no jsdom, no MSW, no in-process rendering.
 
 ---
 
-## 1. What Makes Playwright Different
+## 1. What makes Playwright different
 
 | Aspect | Vitest + RTL + MSW | Playwright |
 |---|---|---|
 | Environment | Node.js + jsdom (simulated DOM) | Real Chromium/Firefox/WebKit browser |
-| Server | None — MSW fakes the network | Real Vite dev server on port 5174 |
+| Server | None, MSW fakes the network | Real Vite dev server on port 5174 |
 | Component rendering | `render(<Component />)` in jsdom | Full app loads in browser via URL |
 | API mocking | MSW patches `fetch`/`http` in Node | `page.route()` intercepts at the browser network layer |
-| Speed | Fast (ms per test) | Slower (seconds — real browser startup + navigation) |
+| Speed | Fast, milliseconds per test | Slower, seconds for browser startup and navigation |
 | What it tests | Component behavior in isolation | Full user flows end-to-end |
 | File location | `src/**/*.test.{ts,tsx}` | `e2e/**/*.spec.ts` |
 
 ### Installed package
 
-**File**: [`package.json`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/package.json)
+**File**: [`package.json`](../../package.json)
 
 ```json
 "@playwright/test": "^1.60.0"
@@ -35,13 +35,13 @@
 | Script | What it does |
 |---|---|
 | `pnpm e2e` | Runs tests in **headless** mode (no visible browser) |
-| `pnpm e2e:headed` | Runs tests in **headed** mode (browser window visible — useful for debugging) |
+| `pnpm e2e:headed` | Runs tests in **headed** mode with the browser window visible, useful for debugging |
 
 ---
 
-## 2. Config — `playwright.config.ts`
+## 2. Config: `playwright.config.ts`
 
-**File**: [`playwright.config.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/playwright.config.ts)
+**File**: [`playwright.config.ts`](../../playwright.config.ts)
 
 ```ts
 import { defineConfig } from '@playwright/test'
@@ -64,7 +64,7 @@ export default defineConfig({
 })
 ```
 
-### Config breakdown:
+### Config breakdown
 
 | Option | Value | Effect |
 |---|---|---|
@@ -76,7 +76,7 @@ export default defineConfig({
 | `trace` | `'on-first-retry'` | Captures a trace (timeline of actions, DOM snapshots, network) only on the first retry of a failed test |
 | `screenshot` | `'only-on-failure'` | Auto-captures a screenshot when a test fails |
 
-### `webServer` — Auto-starting the Dev Server
+### `webServer`, auto-starting the dev server
 
 ```ts
 webServer: {
@@ -99,7 +99,7 @@ webServer: {
 
 ---
 
-## 3. File Structure
+## 3. File structure
 
 ```
 e2e/
@@ -110,13 +110,13 @@ e2e/
 
 ---
 
-## 4. E2E Helpers — Route-Level API Mocking
+## 4. E2E helpers, route-level API mocking
 
-**File**: [`e2e/helpers.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/e2e/helpers.ts)
+**File**: [`e2e/helpers.ts`](../../e2e/helpers.ts)
 
 Unlike Vitest tests (which use MSW to patch Node's HTTP), Playwright tests use `page.route()` to intercept requests **at the browser's network layer**.
 
-### 4a. Response Builders
+### 4a. Response builders
 
 ```ts
 export const ok = <T>(data: T, message = 'OK') => ({
@@ -142,7 +142,7 @@ export const apiError = (message = 'Unauthorized') => ({
 > [!NOTE]
 > These return **plain objects** (not `HttpResponse` instances like MSW). Playwright's `route.fulfill()` accepts raw JSON which it wraps into a proper HTTP response.
 
-### 4b. Auth Me Helper
+### 4b. Auth-me helper
 
 ```ts
 export const authMe = (capabilities: string[] = ['posts.view']) =>
@@ -164,7 +164,7 @@ authMe(['posts.view', 'auditLogs.view'])  // User who can also see logs
 authMe([])                                 // User with no capabilities
 ```
 
-### 4c. Route Fulfillment
+### 4c. Route fulfillment
 
 ```ts
 export async function fulfillJson(route: Route, body: unknown, status = 200) {
@@ -181,7 +181,7 @@ This is the bridge between Playwright's `page.route()` callback and the response
 2. Stringifies it to JSON.
 3. Fulfills the intercepted route with the proper status code and content type.
 
-### 4d. Dashboard Endpoint Mocking
+### 4d. Dashboard endpoint mocking
 
 ```ts
 export async function mockDashboardEndpoints(page: Page) {
@@ -209,11 +209,11 @@ export async function mockDashboardEndpoints(page: Page) {
 
 ---
 
-## 5. Test Spec — Auth Flow
+## 5. Test spec: auth flow
 
-**File**: [`e2e/auth.spec.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/e2e/auth.spec.ts)
+**File**: [`e2e/auth.spec.ts`](../../e2e/auth.spec.ts)
 
-### Test 1: Successful Login
+### Test 1: successful login
 
 ```ts
 test('user can log in and see the dashboard', async ({ page }) => {
@@ -293,7 +293,7 @@ expect(page).toHaveURL(/\/dashboard/)  → ✅
 expect(page.getByText('e2e@test.com')).toBeVisible()  → ✅
 ```
 
-### Test 2: Unauthenticated Redirect
+### Test 2: unauthenticated redirect
 
 ```ts
 test('unauthenticated user is redirected to login', async ({ page }) => {
@@ -315,9 +315,9 @@ test('unauthenticated user is redirected to login', async ({ page }) => {
 
 ---
 
-## 6. Test Spec — RBAC Flow
+## 6. Test spec: RBAC flow
 
-**File**: [`e2e/rbac.spec.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/e2e/rbac.spec.ts)
+**File**: [`e2e/rbac.spec.ts`](../../e2e/rbac.spec.ts)
 
 ```ts
 test('limited user does not see restricted navigation', async ({ page }) => {
@@ -345,7 +345,7 @@ test('limited user does not see restricted navigation', async ({ page }) => {
 
 ---
 
-## 7. Playwright vs MSW: Route Mocking Comparison
+## 7. Playwright route mocking against MSW
 
 | Feature | MSW (`server.use`) | Playwright (`page.route`) |
 |---|---|---|
@@ -353,12 +353,12 @@ test('limited user does not see restricted navigation', async ({ page }) => {
 | Setup | Global in `setup.ts`, per-test via `server.use()` | Per-test via `page.route()` |
 | Pattern matching | Exact paths: `/api/auth/me` | Glob patterns: `**/api/auth/me` |
 | Response creation | `HttpResponse.json({...})` | `route.fulfill({ body: JSON.stringify({...}) })` |
-| Cleanup | `server.resetHandlers()` in afterEach | Automatic — routes die with the page/context |
+| Cleanup | `server.resetHandlers()` in afterEach | Automatic, routes die with the page or context |
 | Works with | jsdom (simulated browser) | Real browser (Chromium/Firefox/WebKit) |
 
 ---
 
-## 8. Full Execution Chain
+## 8. Full execution chain
 
 ```
 pnpm e2e
@@ -433,7 +433,7 @@ Artifacts saved to test-results/
 
 ---
 
-## 9. File Dependency Map
+## 9. File dependency map
 
 ```
 package.json  ──"e2e": "playwright test"──▶  playwright CLI
@@ -471,7 +471,7 @@ package.json  ──"e2e": "playwright test"──▶  playwright CLI
 
 ---
 
-## 10. Debugging Playwright Tests
+## 10. Debugging Playwright tests
 
 | Need | Command / Config |
 |---|---|
@@ -481,3 +481,28 @@ package.json  ──"e2e": "playwright test"──▶  playwright CLI
 | Generate tests by recording | `pnpm exec playwright codegen http://localhost:5174` |
 | Run a single test file | `pnpm exec playwright test e2e/auth.spec.ts` |
 | Run a single test by name | `pnpm exec playwright test -g "user can log in"` |
+
+---
+
+## 11. Where this shows up
+
+**The jsdom suite is green and login is broken.** Cookies, redirects and
+navigation are browser behaviour. jsdom approximates them; Chromium does not have
+to. This is the class of bug Playwright exists to catch.
+
+**A spec passes locally and fails in CI.** Almost always a timing assumption.
+`await expect(locator).toBeVisible()` retries until the timeout, a bare
+`expect(await locator.isVisible())` samples once and races the app.
+
+**Port 5174 is already in use.** The config starts its own dev server with
+`--strictPort`, so a stray `pnpm dev` on that port stops the run instead of
+silently testing the wrong build.
+
+**A route mock does nothing.** `page.route` must be registered before the
+navigation that triggers the request. Registered after `page.goto`, the real
+request has already left.
+
+---
+
+Previous: [MSW](./MSW.doc.md).
+Next: [client/docs index](../docs.index.md), back to the full topic list.

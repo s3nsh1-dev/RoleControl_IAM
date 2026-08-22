@@ -1,13 +1,13 @@
-# React Testing Library — Implementation Chain Walkthrough
+# React Testing Library, rendering and querying
 
 > **Scope**: How RTL integrates with Vitest to render React components, simulate user interactions, and assert on DOM state.
-> **Core principle**: Test components the way a real user interacts with them — by visible text, roles, and labels, NOT by implementation details.
+> **Core principle**: Test components the way a real user interacts with them: by visible text, roles, and labels, never by implementation details.
 
 ---
 
-## 1. What RTL Actually Is (and Isn't)
+## 1. What RTL is, and what it is not
 
-RTL is **not a test runner** — it cannot discover or execute tests on its own. It is a **rendering + querying utility** that sits on top of Vitest (the runner) and jsdom (the DOM).
+RTL is **not a test runner**. It cannot discover or execute tests on its own. It is a **rendering + querying utility** that sits on top of Vitest (the runner) and jsdom (the DOM).
 
 | Layer | Tool | Role |
 |---|---|---|
@@ -15,12 +15,12 @@ RTL is **not a test runner** — it cannot discover or execute tests on its own.
 | DOM environment | **jsdom** | Provides `document`, `window`, `HTMLElement`, etc. in Node.js |
 | Rendering | **@testing-library/react** | `render()` → mounts a React component tree into jsdom |
 | Querying | **@testing-library/react** | `getByRole()`, `getByText()`, `findByText()`, etc. |
-| User simulation | **@testing-library/user-event** | `userEvent.click()`, `.type()`, `.keyboard()` — realistic event firing |
+| User simulation | **@testing-library/user-event** | `userEvent.click()`, `.type()`, `.keyboard()`, realistic event firing |
 | Custom matchers | **@testing-library/jest-dom** | `toBeVisible()`, `toBeInTheDocument()`, `toHaveTextContent()`, etc. |
 
 ### Installed packages
 
-**File**: [`package.json`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/package.json)
+**File**: [`package.json`](../../package.json)
 
 ```json
 "@testing-library/jest-dom": "^6.9.1",
@@ -30,21 +30,21 @@ RTL is **not a test runner** — it cannot discover or execute tests on its own.
 
 ---
 
-## 2. Matcher Extension (jest-dom → Vitest)
+## 2. Matcher extension, jest-dom into Vitest
 
-**File**: [`src/test/setup.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/setup.ts) — Line 1
+**File**: [`src/test/setup.ts`](../../src/test/setup.ts), line 1
 
 ```ts
 import '@testing-library/jest-dom/vitest'
 ```
 
-### What this does:
+### What this does
 
 1. Imports the `@testing-library/jest-dom/vitest` entry point.
 2. That module calls `expect.extend(...)` to add **~40 custom matchers** to Vitest's `expect()`.
 3. These matchers are now available in every test file.
 
-### Matchers added (commonly used):
+### Matchers added, the ones used most
 
 | Matcher | What it checks |
 |---|---|
@@ -61,13 +61,13 @@ import '@testing-library/jest-dom/vitest'
 
 ---
 
-## 3. The Custom Render — `test-utils.tsx`
+## 3. The custom render in `test-utils.tsx`
 
 RTL's raw `render()` mounts a component into a bare `<div>`. But real app components need **providers** (router, query client, toaster). This project wraps `render()` with providers.
 
-**File**: [`src/test/test-utils.tsx`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/test-utils.tsx)
+**File**: [`src/test/test-utils.tsx`](../../src/test/test-utils.tsx)
 
-### 3a. Test Query Client
+### 3a. Test query client
 
 ```ts
 export function createTestQueryClient() {
@@ -89,7 +89,7 @@ export function createTestQueryClient() {
 > [!TIP]
 > `retry: false` is critical for tests. Without it, a test expecting a failed request would hang for multiple retry attempts before failing. `gcTime: 0` ensures no stale data leaks between tests.
 
-### 3b. Provider Wrapper
+### 3b. Provider wrapper
 
 ```ts
 export function createWrapper(options: WrapperOptions = {}) {
@@ -116,7 +116,7 @@ export function createWrapper(options: WrapperOptions = {}) {
 | `MemoryRouter` | Any component using `useNavigate`, `<Link>`, `useParams` needs a router. `MemoryRouter` is an in-memory router that doesn't need a real URL bar. Test can set initial route via `routerProps`. |
 | `Toaster` | Components that call `toast.success()` / `toast.error()` need the Sonner toaster mounted to actually render toast notifications in jsdom. |
 
-### 3c. The `renderWithProviders` Function
+### 3c. The `renderWithProviders` function
 
 ```ts
 export function renderWithProviders(
@@ -147,7 +147,7 @@ export { renderWithProviders as render }          // ← shadows the raw render
 
 ---
 
-## 4. How a Component Test Executes
+## 4. How a component test executes
 
 Here's the complete chain when a test renders a component:
 
@@ -192,20 +192,20 @@ Test file calls:  render(<LoginPage />)
 
 ---
 
-## 5. Query Types Cheat Sheet
+## 5. Query types cheat sheet
 
 RTL provides multiple query variants. Understanding the naming convention is key:
 
 | Prefix | Returns | Throws on missing? | Async? | Use case |
 |---|---|---|---|---|
-| `getBy*` | Element | ✅ Yes | No | Element must exist right now |
-| `queryBy*` | Element \| `null` | ❌ No | No | Assert element does NOT exist |
-| `findBy*` | Promise\<Element\> | ✅ Yes (after timeout) | Yes | Element appears after async operation |
-| `getAllBy*` | Element[] | ✅ Yes | No | Multiple elements expected |
-| `queryAllBy*` | Element[] (empty OK) | ❌ No | No | Check count of elements |
-| `findAllBy*` | Promise\<Element[]\> | ✅ Yes | Yes | Multiple elements after async |
+| `getBy*` | Element | Yes | No | Element must exist right now |
+| `queryBy*` | Element \| `null` | No | No | Assert element does NOT exist |
+| `findBy*` | Promise\<Element\> | Yes (after timeout) | Yes | Element appears after async operation |
+| `getAllBy*` | Element[] | Yes | No | Multiple elements expected |
+| `queryAllBy*` | Element[] (empty OK) | No | No | Check count of elements |
+| `findAllBy*` | Promise\<Element[]\> | Yes | Yes | Multiple elements after async |
 
-### Query selectors (by priority — prefer top of list):
+### Query selectors, best first
 
 | Selector | Example | Accesses |
 |---|---|---|
@@ -220,7 +220,7 @@ RTL provides multiple query variants. Understanding the naming convention is key
 
 ---
 
-## 6. User Event vs fireEvent
+## 6. userEvent against fireEvent
 
 This project uses `@testing-library/user-event` (re-exported from `test-utils.tsx`):
 
@@ -234,7 +234,7 @@ export { default as userEvent } from '@testing-library/user-event'
 | `click()` | Fires just `click` | Fires `pointerdown` → `mousedown` → `pointerup` → `mouseup` → `click` |
 | `type()` | N/A | Fires `keydown` → `keypress` → `input` → `keyup` per character |
 | Focus management | Manual | Automatic (clicking focuses the element) |
-| Realism | Low | High — matches real browser behavior |
+| Realism | Low | High, matches real browser behaviour |
 
 > [!TIP]
 > Always prefer `userEvent` over `fireEvent`. It catches bugs that `fireEvent` misses (e.g., a button that works on `click` but is broken on `pointerdown`).
@@ -243,7 +243,7 @@ export { default as userEvent } from '@testing-library/user-event'
 
 ## 7. Cleanup
 
-**File**: [`src/test/setup.ts`](file:///home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/client/src/test/setup.ts) — Line 25
+**File**: [`src/test/setup.ts`](../../src/test/setup.ts), line 25
 
 ```ts
 afterEach(() => {
@@ -261,7 +261,7 @@ Without cleanup, component state, side effects, and DOM nodes from test A would 
 
 ---
 
-## 8. Integration Map
+## 8. Integration map
 
 ```
                     ┌──────────────────────────────┐
@@ -288,3 +288,28 @@ Without cleanup, component state, side effects, and DOM nodes from test A would 
                            Vitest expect()
                          (extended with jest-dom)
 ```
+
+---
+
+## 9. Where this shows up
+
+**A refactor breaks 20 tests without changing behaviour.** The tests queried by
+class name or DOM structure. `getByRole('button', { name: 'Save' })` survives a
+markup change; `container.querySelector('.btn-primary')` does not.
+
+**An element "is not in the document" but you can see it in the debug output.**
+It renders after an await. `getBy*` throws immediately, `findBy*` waits. That one
+prefix is most async test failures.
+
+**A click does nothing.** `fireEvent.click` dispatches one event. A real click
+also focuses, and some components only act on focus plus click. `userEvent.click`
+fires the whole sequence.
+
+**Two tests pass separately and fail together.** Without the `cleanup()` in
+`afterEach`, the first render is still mounted, so `getByText` finds two matches
+and throws.
+
+---
+
+Previous: [Vitest](./Vitest.doc.md).
+Next: [MSW](./MSW.doc.md), which answers the requests these rendered components fire.
