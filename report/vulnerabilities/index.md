@@ -1,4 +1,4 @@
-# Vulnerabilities — Index
+# Vulnerabilities index
 
 23 findings. Ranked out of 10 by **exploitability × blast radius × likelihood**,
 not by CVSS. A "10" would be unauthenticated remote code execution; a "3" is
@@ -101,3 +101,8 @@ If you read only three: [01](./01.jwt-token-confusion-and-session-revocation-byp
 
 Ordering constraints, contradictions, and the phased fix plan are in the
 [master index](../index.md).
+
+---
+
+Previous: [Report index](../index.md).
+Next: [V01 Refresh token works as an access token](./01.jwt-token-confusion-and-session-revocation-bypass.md), the finding four others depend on.

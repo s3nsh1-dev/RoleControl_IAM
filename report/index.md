@@ -1,4 +1,4 @@
-# RoleControl IAM — Audit Report
+# RoleControl IAM audit report
 
 **Audited:** 7 August 2026 · **Branch:** `dev` @ `7d184f4`
 **Scope:** full stack — `server/` (Express 5 + TypeScript + PostgreSQL + Redis) and `client/` (Vite + React 19 + TanStack Query)
@@ -82,7 +82,7 @@ rather than whether it is correct.
 Four phases. Each is independently shippable and leaves the system better than it
 found it. **Do not reorder Phase 1.**
 
-### Phase 1 — Make sessions real (1–2 days)
+### Phase 1: Make sessions real (1–2 days)
 
 Nothing else in this report matters until an operator can end a session.
 Today, no action available in the system does that.
@@ -99,7 +99,7 @@ Write the failing tests from
 [S15](./suggestions/15.authorization-test-matrix.md)'s authentication section
 **before** the fixes. Watching them go red then green is the proof.
 
-### Phase 2 — Close the authorization gaps (1–2 days)
+### Phase 2: Close the authorization gaps (1–2 days)
 
 | Order | Item | Why here |
 |---|---|---|
@@ -109,7 +109,7 @@ Write the failing tests from
 | 4 | [V20 · post ownership consistency](./vulnerabilities/20.updatepost-and-post-ownership-inconsistencies.md) | Consumes that helper. |
 | 5 | [V12 · RBAC self-destruct guards](./vulnerabilities/12.rbac-self-destruct-via-role-and-permission-deletion.md) | Shares V06's migration. **One migration, both findings.** |
 
-### Phase 3 — Make it deployable (2–3 days)
+### Phase 3: Make it deployable (2–3 days)
 
 | Order | Item | Why here |
 |---|---|---|
@@ -122,7 +122,7 @@ Write the failing tests from
 | 7 | [S07 · health + shutdown](./suggestions/07.health-readiness-and-graceful-shutdown.md), [S06 · logging](./suggestions/06.structured-logging-and-request-ids.md), [V17 · auth audit trail](./vulnerabilities/17.no-authentication-audit-trail.md) | V17 **must** come after V02. |
 | 8 | [S14 · Docker compose](./suggestions/14.docker-compose-and-reproducible-dev-env.md) | Needs S07's health endpoints. Will surface the broken `dist` build. |
 
-### Phase 4 — Structural improvements (ongoing)
+### Phase 4: Structural improvements (ongoing)
 
 Now that behaviour is correct, improve the shape.
 [S02](./suggestions/02.thread-transaction-client-through-helpers.md) →
@@ -145,7 +145,7 @@ Optional and large: [S03](./suggestions/03.database-driven-role-hierarchy.md),
 These are the places where implementing two findings independently produces
 conflicting code. **Read this section before writing anything.**
 
-### Genuine either/or — pick one
+### Genuine either/or: pick one
 
 | Decision | Option A | Option B | Recommendation |
 |---|---|---|---|
@@ -307,3 +307,8 @@ says so explicitly. Findings [13](./vulnerabilities/13.unauthenticated-openapi-a
 [16](./vulnerabilities/16.client-auth-flag-is-persisted-and-forgeable.md) and
 [23](./vulnerabilities/23.error-messages-leak-internal-detail.md) in particular
 are ranked lower than a scanner would rank them, with the reasoning given.
+
+---
+
+Previous: [Repository README](../README.md).
+Next: [Vulnerabilities index](./vulnerabilities/index.md), 23 findings ranked by severity.

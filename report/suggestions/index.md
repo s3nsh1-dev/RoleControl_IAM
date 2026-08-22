@@ -1,4 +1,4 @@
-# Suggestions — Index
+# Suggestions index
 
 20 suggestions. Ranked out of 10 by **impact on maintainability, correctness and
 deployability** — not urgency. A high-ranked suggestion is one where the payoff
@@ -114,3 +114,8 @@ structural change with the largest compounding return).
 
 Sequencing and the before/after project score are in the
 [master index](../index.md).
+
+---
+
+Previous: [V23 Auth failures leak internal error text](../vulnerabilities/23.error-messages-leak-internal-detail.md), the last vulnerability.
+Next: [S01 Move the coarse permission check into route middleware](./01.centralize-authorization-in-middleware.md).
