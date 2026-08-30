@@ -76,4 +76,4 @@ Cap helper: [session.util.ts](../../src/utils/session.util.ts).
 ---
 
 Previous: [Migrations](../migrations_docs/README.md).
-Next: [Testing](../testing.md) for the suites that cover these paths.
+Next: [Server documentation index](../README.md), back to the start.

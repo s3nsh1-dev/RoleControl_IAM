@@ -12,8 +12,6 @@ order below; each one ends with a link to the next.
 | 3 | [Operations](./operations.md) | How to run it, which command destroys data, what every env var is for |
 | 4 | [Migrations](./migrations_docs/README.md) | How the schema changes without a reset |
 | 5 | [Session management](./session_management/README.md) | Logout, admin revocation, and the 2-row cap |
-| 6 | [Testing](./testing.md) | The five suites, what each covers, what they need |
-| 7 | [Testing history](./testing-history/README.md) | Recorded results per suite version |
 
 ```mermaid
 flowchart LR
@@ -21,8 +19,6 @@ flowchart LR
     B --> C[3. Operations]
     C --> D[4. Migrations]
     D --> E[5. Sessions]
-    E --> F[6. Testing]
-    F --> G[7. History]
 ```
 
 ## Where the truth lives
@@ -39,8 +35,7 @@ places are authoritative on their own:
 ## Related
 
 - [server/README.md](../README.md), project overview and quick start.
-- [server/tests/README.md](../tests/README.md), suite-local notes.
-- [report/](../../report/index.md), the security and design audit, 23 vulnerabilities and 20 suggestions.
+- [report/](../../report/index.md), the security and design audit, 23 vulnerabilities and 19 suggestions.
 - [server/learning_readme/](../learning_readme), study notes and design history. Not maintained as reference.
 
 ---

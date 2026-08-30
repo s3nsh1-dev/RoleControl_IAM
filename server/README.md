@@ -93,7 +93,6 @@ See:
 - [docs/api.md](/home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/docs/api.md)
 - [docs/architecture.md](/home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/docs/architecture.md)
 - [docs/operations.md](/home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/docs/operations.md)
-- [docs/testing.md](/home/shubham-pandey/Local_Storage/Codes/learning_something_new/NodeJS/learn_RBAC_postgresql/docs/testing.md)
 
 ## Important Operational Notes
 
@@ -118,13 +117,6 @@ src/
   routes/
   types/
   utils/
-tests/
-  support/
-  v1-archive/
-  v2-integration/
-  v3-migrations/
-  v4-rate-limits/
-  v5-openapi/
 ```
 
 High-level responsibilities:
@@ -148,9 +140,3 @@ High-level responsibilities:
 - `pnpm run migrate:down`: roll back the latest migration
 - `pnpm run migrate:status`: show applied and pending migrations
 - `pnpm run openapi:export`: write `openapi/openapi.json`
-- `pnpm test`: run the main integration suite (`v2`)
-- `pnpm test:v1`: run the archived baseline suite
-- `pnpm test:v2`: run the active integration suite
-- `pnpm test:v3`: run the migration verification suite
-- `pnpm test:v4`: run the rate-limit verification suite
-- `pnpm test:v5`: run the OpenAPI verification suite

@@ -47,3 +47,7 @@ Thumbs.db
 
 # Project specific
 # learning_readme/
+# Test artifacts
+coverage/
+test-results/
+*.lcov

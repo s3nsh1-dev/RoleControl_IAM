@@ -1,6 +1,6 @@
 # Suggestions index
 
-20 suggestions. Ranked out of 10 by **impact on maintainability, correctness and
+19 suggestions. Ranked out of 10 by **impact on maintainability, correctness and
 deployability** — not urgency. A high-ranked suggestion is one where the payoff
 compounds; a low-ranked one is worth doing but nothing depends on it.
 
@@ -16,7 +16,6 @@ These are not bugs. Several are alternative designs, and two of them are
 | [01](./01.centralize-authorization-in-middleware.md) | Move the coarse permission check into route middleware | **9** | Server | Medium |
 | [02](./02.thread-transaction-client-through-helpers.md) | Replace transaction boilerplate with `withTransaction` | **8** | Server | Small |
 | [03](./03.database-driven-role-hierarchy.md) | Move the role hierarchy into the database; unlock custom roles | **8** | Both | Medium-large |
-| [15](./15.authorization-test-matrix.md) | Build an exhaustive role × endpoint authorization matrix | **8** | Both | Medium |
 | [05](./05.postgres-and-redis-production-config.md) | Configure the pool and Redis client for production | **7** | Server | Small |
 | [06](./06.structured-logging-and-request-ids.md) | Replace 40 `console.*` calls with structured logging | **7** | Server | Small-medium |
 | [13](./13.environment-config-and-secret-management.md) | Split config by environment; stop defaulting secrets | **7** | Both | Small |
@@ -59,7 +58,6 @@ This cluster is the largest single gap between "a good learning project" and "a
 deployable service", and it is mostly cheap.
 
 **Contract and correctness** —
-[15](./15.authorization-test-matrix.md),
 [16](./16.openapi-as-contract-source-of-truth.md),
 [18](./18.error-taxonomy-and-client-mapping.md),
 [09](./09.pagination-strategy.md).
@@ -99,7 +97,7 @@ you immediately delete.
 |------|-------|
 | Server only | 8 — [01](./01.centralize-authorization-in-middleware.md), [02](./02.thread-transaction-client-through-helpers.md), [04](./04.service-layer-and-repositories.md), [05](./05.postgres-and-redis-production-config.md), [06](./06.structured-logging-and-request-ids.md), [07](./07.health-readiness-and-graceful-shutdown.md), [08](./08.single-validation-middleware.md) |
 | Client only | 4 — [10](./10.client-capability-guard-component.md), [11](./11.react-query-cache-hardening.md), [12](./12.axios-refresh-interceptor-correctness.md), [20](./20.accessibility-and-dialog-focus-management.md) |
-| Both | 8 — [03](./03.database-driven-role-hierarchy.md), [09](./09.pagination-strategy.md), [13](./13.environment-config-and-secret-management.md), [14](./14.docker-compose-and-reproducible-dev-env.md), [15](./15.authorization-test-matrix.md), [16](./16.openapi-as-contract-source-of-truth.md), [17](./17.repository-hygiene-and-generated-artifacts.md), [18](./18.error-taxonomy-and-client-mapping.md), [19](./19.session-cap-and-device-management.md) |
+| Both | 8 — [03](./03.database-driven-role-hierarchy.md), [09](./09.pagination-strategy.md), [13](./13.environment-config-and-secret-management.md), [14](./14.docker-compose-and-reproducible-dev-env.md), [16](./16.openapi-as-contract-source-of-truth.md), [17](./17.repository-hygiene-and-generated-artifacts.md), [18](./18.error-taxonomy-and-client-mapping.md), [19](./19.session-cap-and-device-management.md) |
 
 ---
 
@@ -108,8 +106,9 @@ you immediately delete.
 [02](./02.thread-transaction-client-through-helpers.md) (fixes two
 vulnerabilities for free), [13](./13.environment-config-and-secret-management.md)
 (absorbs six findings' config changes),
-[15](./15.authorization-test-matrix.md) (proves the security fixes worked and
-stops regressions), [01](./01.centralize-authorization-in-middleware.md) (the
+[16](./16.openapi-as-contract-source-of-truth.md) (closes the gaps between the
+contract and what is enforced),
+[01](./01.centralize-authorization-in-middleware.md) (the
 structural change with the largest compounding return).
 
 Sequencing and the before/after project score are in the

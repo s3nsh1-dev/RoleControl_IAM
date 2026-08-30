@@ -2,12 +2,12 @@
 
 **Audited:** 7 August 2026 · **Branch:** `dev` @ `7d184f4`
 **Scope:** full stack — `server/` (Express 5 + TypeScript + PostgreSQL + Redis) and `client/` (Vite + React 19 + TanStack Query)
-**Output:** 23 vulnerabilities · 20 suggestions
+**Output:** 23 vulnerabilities · 19 suggestions
 
 | | |
 |---|---|
 | [→ Vulnerabilities index](./vulnerabilities/index.md) | 23 findings, ranked, by theme and by side |
-| [→ Suggestions index](./suggestions/index.md) | 20 suggestions, ranked, with supersession map |
+| [→ Suggestions index](./suggestions/index.md) | 19 suggestions, ranked, with supersession map |
 
 ---
 
@@ -66,7 +66,6 @@ same codebase, judged as a generic CRUD API, would score around 7.
 | Authorization scope | 4 | **9** | Findings [02](./vulnerabilities/02.overpermissive-default-user-role.md), [06](./vulnerabilities/06.role-rename-privilege-escalation.md), [11](./vulnerabilities/11.session-revocation-and-peer-actions-lack-hierarchy-checks.md), [12](./vulnerabilities/12.rbac-self-destruct-via-role-and-permission-deletion.md), [20](./vulnerabilities/20.updatepost-and-post-ownership-inconsistencies.md) + Suggestion [01](./suggestions/01.centralize-authorization-in-middleware.md) |
 | Operational readiness | 3 | **8** | Findings [09](./vulnerabilities/09.jwt-secret-and-credentials-default-to-placeholders.md), [10](./vulnerabilities/10.no-security-headers-no-cors-policy-and-cookie-flags.md), [13](./vulnerabilities/13.unauthenticated-openapi-and-docs-exposure.md), [22](./vulnerabilities/22.trust-proxy-misconfiguration-enables-limit-bypass.md) + Suggestions [05](./suggestions/05.postgres-and-redis-production-config.md), [07](./suggestions/07.health-readiness-and-graceful-shutdown.md), [13](./suggestions/13.environment-config-and-secret-management.md), [14](./suggestions/14.docker-compose-and-reproducible-dev-env.md) |
 | Observability | 4 | **8** | Finding [17](./vulnerabilities/17.no-authentication-audit-trail.md) + Suggestion [06](./suggestions/06.structured-logging-and-request-ids.md) |
-| Testing | 6 | **8** | Suggestion [15](./suggestions/15.authorization-test-matrix.md) |
 | Transaction handling | 8 | **9** | Suggestion [02](./suggestions/02.thread-transaction-client-through-helpers.md) |
 
 Reaching **9.5** would additionally need Suggestions
@@ -94,10 +93,6 @@ Today, no action available in the system does that.
 | 3 | [V04 · revoke sessions on credential change](./vulnerabilities/04.password-change-does-not-revoke-sessions.md) | Introduces `revokeAllSessionsForUser`, used by three findings. |
 | 4 | [V05 · refresh reuse detection](./vulnerabilities/05.refresh-token-rotation-without-reuse-detection.md) | Uses the same helper; changes 400 → 401 so the client handles it. |
 | 5 | [V14 · honest auth router](./vulnerabilities/14.auth-router-is-not-actually-protected.md) | Five-line routing fix; closes the bootstrap door. |
-
-Write the failing tests from
-[S15](./suggestions/15.authorization-test-matrix.md)'s authentication section
-**before** the fixes. Watching them go red then green is the proof.
 
 ### Phase 2: Close the authorization gaps (1–2 days)
 
@@ -128,7 +123,6 @@ Now that behaviour is correct, improve the shape.
 [S02](./suggestions/02.thread-transaction-client-through-helpers.md) →
 [S01](./suggestions/01.centralize-authorization-in-middleware.md) →
 [S08](./suggestions/08.single-validation-middleware.md) →
-[S15](./suggestions/15.authorization-test-matrix.md) →
 [S16](./suggestions/16.openapi-as-contract-source-of-truth.md) →
 client work ([S10](./suggestions/10.client-capability-guard-component.md),
 [S11](./suggestions/11.react-query-cache-hardening.md),

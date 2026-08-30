@@ -69,7 +69,7 @@ Responses follow a **consistent envelope** (`AppResponse` / `AppError`) so the c
 
 **Rate limiting** goes through **Redis** in layers so login, refresh, and normal API traffic can be tuned separately. **Migrations** keep the schema versioned.
 
-If you want code, I’d start at [`server/src/app.ts`](../../server/src/app.ts) for the route map, then one feature route + controller, then [`server/tests/`](../../server/tests/) for how I lock behavior.”
+If you want code, I’d start at [`server/src/app.ts`](../../server/src/app.ts) for the route map, then one feature route + controller.”
 
 ---
 

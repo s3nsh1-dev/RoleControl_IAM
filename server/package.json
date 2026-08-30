@@ -15,13 +15,7 @@
     "migrate:up": "tsx src/config/db.migrate.ts up",
     "migrate:down": "tsx src/config/db.migrate.ts down",
     "migrate:status": "tsx src/config/db.migrate.ts status",
-    "openapi:export": "tsx src/openapi/export.ts",
-    "test": "node --import tsx --test --test-concurrency=1 tests/v2-integration/index.test.ts",
-    "test:v1": "node --import tsx --test --test-concurrency=1 tests/v1-archive/index.test.ts",
-    "test:v2": "node --import tsx --test --test-concurrency=1 tests/v2-integration/index.test.ts",
-    "test:v3": "node --import tsx --test --test-concurrency=1 tests/v3-migrations/index.test.ts",
-    "test:v4": "node --import tsx --test --test-concurrency=1 tests/v4-rate-limits/index.test.ts",
-    "test:v5": "node --import tsx --test --test-concurrency=1 tests/v5-openapi/index.test.ts"
+    "openapi:export": "tsx src/openapi/export.ts"
   },
   "keywords": [
     "RBAC",
