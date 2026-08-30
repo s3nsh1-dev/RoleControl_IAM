@@ -45,5 +45,11 @@ Thumbs.db
 .agent/
 .codex
 
-# Project specific
-# learning_readme/
+# Learning material, not project guidance (markdown-only folders)
+docs/
+learning_readme/
+
+# Test artifacts
+coverage/
+test-results/
+*.lcov

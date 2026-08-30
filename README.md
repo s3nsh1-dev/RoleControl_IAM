@@ -25,8 +25,7 @@ This repository contains RoleControl IAM: an Express + TypeScript RBAC API backe
     ├── learning_readme/
     ├── migrations/
     ├── openapi/
-    ├── src/
-    └── tests/
+    └── src/
 ```
 
 ## Folder And File Summary
@@ -68,7 +67,7 @@ client/src/
 
 ### `server/`
 
-Main backend application directory. It contains the Express API, database setup, migrations, tests, OpenAPI contract, and project documentation.
+Main backend application directory. It contains the Express API, database setup, migrations, OpenAPI contract, and project documentation.
 
 - `README.md`: backend-specific setup notes, capabilities, API surface, scripts, and operational details.
 - `index.ts`: backend entrypoint that starts the Express server.
@@ -145,8 +144,6 @@ Maintained project documentation.
 - `api.md`: API behavior and endpoint documentation.
 - `architecture.md`: backend architecture notes.
 - `operations.md`: operational and deployment guidance.
-- `testing.md`: current testing approach.
-- `testing-history/`: historical notes for test-suite versions.
 
 ### `server/learning_readme/`
 
@@ -163,29 +160,6 @@ SQL migration files for PostgreSQL schema changes.
 Generated OpenAPI output.
 
 - `openapi.json`: exported machine-readable API specification.
-
-### `server/tests/`
-
-Automated test suites and shared test helpers.
-
-```text
-server/tests/
-├── README.md
-├── support/
-├── v1-archive/
-├── v2-integration/
-├── v3-migrations/
-├── v4-rate-limits/
-└── v5-openapi/
-```
-
-- `README.md`: test-suite documentation.
-- `support/`: shared test helpers for HTTP requests, PostgreSQL setup, and Redis setup.
-- `v1-archive/`: archived baseline tests.
-- `v2-integration/`: active integration tests for auth, users, roles, permissions, and posts.
-- `v3-migrations/`: migration and schema verification tests.
-- `v4-rate-limits/`: auth and global rate-limit verification tests.
-- `v5-openapi/`: OpenAPI contract verification tests.
 
 ## Important Runtime Areas
 
